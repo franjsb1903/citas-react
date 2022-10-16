@@ -1,21 +1,49 @@
-import { useState } from 'react'
-import Formulario from './components/Formulario'
+import { useState, useEffect } from 'react'
+import Form from './components/Form'
 import Header from './components/Header'
-import ListadoPacientes from './components/ListadoPacientes'
+import PatientsList from './components/PatientsList'
 
 function App() {
-  const [pacientes, setPacientes] = useState([])
+  const [patients, setPatients] = useState(
+    JSON.parse(localStorage.getItem('patients')) ?? []
+  )
+  const [patientToEdit, setPatientToEdit] = useState({})
 
-  const addPaciente = paciente => {
-    setPacientes([paciente, ...pacientes])
+  useEffect(() => {
+    localStorage.setItem('patients', JSON.stringify(patients))
+  }, [patients])
+
+  const addPatient = patient => {
+    setPatients([...patients, patient])
+  }
+
+  const editPatient = patient => {
+    const updated = patients.map(patientState =>
+      patientState.id === patient.id ? patient : patientState
+    )
+    setPatients(updated)
+    setPatientToEdit({})
+  }
+
+  const deletePatient = id => {
+    const noDeleted = patients.filter(patient => patient.id !== id)
+    setPatients(noDeleted)
   }
 
   return (
     <div className="container mx-auto mt-20">
       <Header />
       <div className="mt-12 md:flex">
-        <Formulario addPaciente={addPaciente} />
-        <ListadoPacientes />
+        <Form
+          addPatient={addPatient}
+          patientToEdit={patientToEdit}
+          editPatient={editPatient}
+        />
+        <PatientsList
+          patients={patients}
+          setPatientToEdit={setPatientToEdit}
+          deletePatient={deletePatient}
+        />
       </div>
     </div>
   )
